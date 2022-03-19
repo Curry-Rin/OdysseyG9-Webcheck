@@ -2,7 +2,7 @@
 A simple python script which will check the Samsung website for the Samsung Odyssey G9 monitor and pop up a message to alert you there's a firmware update
 
 To use the script, make a folder somewhere on your computer where the script will update text files.
-Pass the path to automationRoot and outputFile.
+Pass the path to the variables automationRoot and outputFile.
 
 To automate the script to run, use the task scheduler and use "Start a Program" for the action.
 Once you reach Program/Script section, pass the path to your python executable:
