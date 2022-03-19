@@ -1,0 +1,79 @@
+# Python script checks the samsung odyssey G9 update and pops up a messagebox when a change is detected.
+import urllib.request
+import os.path
+from sys import exit
+import tkinter as tk
+from tkinter import messagebox
+import webbrowser
+from datetime import datetime
+
+# Assign the URL to check
+webLink = "https://www.samsung.com/uk/support/model/LC49G95TSSUXEN/"
+
+# Root path for where the text files will live. You will need to manually create the folders yourself.
+automationRoot = "CHANGEME"
+#Example Path: automationRoot = "F:\AutomationStuff\G9Check" + "\\"
+
+#Assign the output text file
+outputFile = "CHANGEME"
+#Example Path outputFile = "F:\AutomationStuff\G9Check\currentFirmwareVer.txt"
+
+# function checks the website, takes the HTML data, and then returns the text
+# Returns two variables as string, 1. The HTML / CSS data in the page at slot[0], [1] has the text file path.
+# TO DO: the firmwares don't update on samsung website at the same time. They usually are in korea website before U.S. which is why we have the .txt
+def check_website(webURL, region):
+    # Create a text file using today's date...
+    fileName = "G9Check_" + region
+    fullFilePath = automationRoot + fileName + ".txt"
+  #  print(fileName)
+    # Create the text file if it doesn't exist...
+    if os.path.isfile(fullFilePath) is not True:
+        f = open(fullFilePath, "x")
+
+    # Open the URL as Browser, provide headers so that you don't get denied.
+    page = urllib.request.Request(webLink, headers={'User-Agent': 'Mozilla/5.0'})
+    infile = urllib.request.urlopen(page).read()
+    data = infile.decode('utf-8')  # Read the content as string decoded with UTF-8 format
+# Uncomment this print data if you want to see all the HTML data in console.
+ #   print(data)
+    return data, fullFilePath
+
+
+dataReturned = check_website(webLink, "USA")
+
+# Got HTML Data. Find HTML line of interest
+# Write to the text file so we have it.
+with open(dataReturned[1], "w", encoding='utf-8') as text_file:
+    text_file.write(dataReturned[0])
+
+# while we could look for the entire text file we're actually only interested in this one line.
+allText = dataReturned[0].splitlines()
+for lines in allText:
+    if "<li data-sdf-prop=\"contents\">" in lines:
+        lineOfInterest = lines.strip()
+        break
+
+# Now parse through the line of interest and check for the current fileName.
+lineOfInterest = lineOfInterest.split(":")
+firmwareVersion = (lineOfInterest[3].split(","))[0].replace("\"", "")
+
+# Compare the version from the website with the version stored in the text file. If it matches then end the execution.
+with open(outputFile, "r") as ver_file:
+    previousVersionListed = ver_file.read()
+
+#Firmware is unchanged from the value on file, so there's no updates. Exit script execution.
+if previousVersionListed == firmwareVersion:
+    exit()
+
+# If the script reaches this far, an update had to have happened -----------------------------------------------
+# Output the new firmware version to the file.
+with open(outputFile, "w") as ver_file:
+    ver_file.write(firmwareVersion)
+
+# Notify the user that there's an update, prompt themp if they want to open a link?
+userResponse = messagebox.askyesno(title="G9 Web Check", message="Firmware Version: " + firmwareVersion + " has been released. Do you want to navigate to the website?")
+
+if userResponse:
+    webbrowser.open_new(webLink)
+
+
