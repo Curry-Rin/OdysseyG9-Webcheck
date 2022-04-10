@@ -31,7 +31,7 @@ def check_website(webURL, region):
         f = open(fullFilePath, "x")
 
     # Open the URL as Browser, provide headers so that you don't get denied.
-    page = urllib.request.Request(webLink, headers={'User-Agent': 'Mozilla/5.0'})
+    page = urllib.request.Request(webURL, headers={'User-Agent': 'Mozilla/5.0'})
     infile = urllib.request.urlopen(page).read()
     data = infile.decode('utf-8')  # Read the content as string decoded with UTF-8 format
 # Uncomment this print data if you want to see all the HTML data in console.
